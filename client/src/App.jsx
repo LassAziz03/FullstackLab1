@@ -9,6 +9,8 @@ function App() {
   const [categories, setCategories] = useState([]);
   const [videos, setVideos] = useState([]);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
 
   const fetchCategories = async (userId) => {
     const res = await fetch(`http://localhost:3000/api/categories/user/${userId}`);
@@ -16,11 +18,25 @@ function App() {
     setCategories(data);
   };
 
-  const fetchVideos = async (userId) => {
+const fetchVideos = async (userId) => {
+  try {
+    setLoading(true);
+    setError("");
+
     const res = await fetch(`http://localhost:3000/api/videos/user/${userId}`);
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch videos");
+    }
+
     const data = await res.json();
     setVideos(data);
-  };
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     if (!user) return;
@@ -43,6 +59,15 @@ function App() {
     <div>
       <h1>MMA Video Library</h1>
       <p>Logged in as: {user.username}</p>
+      <input
+        type="text"
+        placeholder="Search videos..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+      {loading && <p>Loading videos...</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
       <CategoryForm user={user} fetchCategories={fetchCategories} />
 
@@ -52,7 +77,12 @@ function App() {
         fetchVideos={fetchVideos}
       />
 
-      <VideoList videos={videos} fetchVideos={fetchVideos} user={user} />
+      <VideoList
+        videos={videos}
+        fetchVideos={fetchVideos}
+        user={user}
+        search={search}
+      />
     </div>
   );
 }
