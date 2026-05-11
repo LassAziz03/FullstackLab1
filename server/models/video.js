@@ -4,14 +4,17 @@ const videoSchema = new mongoose.Schema(
   {
     url: {
       type: String,
-      required: true
+      required: true,
+      trim: true
     },
     title: {
       type: String,
-      required: true
+      required: true,
+      trim: true
     },
     notes: {
-      type: String
+      type: String,
+      trim: true
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
